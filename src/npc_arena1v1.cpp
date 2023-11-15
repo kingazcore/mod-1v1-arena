@@ -147,26 +147,26 @@ public:
 
         if (player->InBattlegroundQueueForBattlegroundQueueType(bgQueueTypeId))
         {
-            AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Queue leave 1v1 Arena", GOSSIP_SENDER_MAIN, 3, "Are you sure?", 0, false);
+            AddGossipItemFor(player, GOSSIP_ICON_CHAT, "离开1v1竞技场队列", GOSSIP_SENDER_MAIN, 3, "确定要离开竞技场队列吗?", 0, false);
         }
         else
         {
-            AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Queue enter 1v1 Arena (UnRated)", GOSSIP_SENDER_MAIN, 20);
+            AddGossipItemFor(player, GOSSIP_ICON_CHAT, "进入1v1竞技场（非评级）", GOSSIP_SENDER_MAIN, 20);
         }
 
         if (!teamExistForPlayerGuid(player))
         {
-            AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Create new 1v1 Arena Team", GOSSIP_SENDER_MAIN, 1, "Are you sure?", sConfigMgr->GetOption<uint32>("Arena1v1.Costs", 400000), false);
+            AddGossipItemFor(player, GOSSIP_ICON_CHAT, "创建新的1v1竞技场战队", GOSSIP_SENDER_MAIN, 1, "确定创建吗?", sConfigMgr->GetOption<uint32>("Arena1v1.Costs", 10000), false);
         }
         else
         {
             if (!player->InBattlegroundQueueForBattlegroundQueueType(bgQueueTypeId))
             {
-                AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Queue enter 1v1 Arena (Rated)", GOSSIP_SENDER_MAIN, 2);
-                AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Arenateam Clear", GOSSIP_SENDER_MAIN, 5, "Are you sure?", 0, false);
+                AddGossipItemFor(player, GOSSIP_ICON_CHAT, "进入1v1竞技场（评级）", GOSSIP_SENDER_MAIN, 2);
+                AddGossipItemFor(player, GOSSIP_ICON_CHAT, "清除竞技场战队", GOSSIP_SENDER_MAIN, 5, "确认删除吗?", 0, false);
             }
 
-            AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Shows your statistics", GOSSIP_SENDER_MAIN, 4);
+            AddGossipItemFor(player, GOSSIP_ICON_CHAT, "查看你的统计信息", GOSSIP_SENDER_MAIN, 4);
         }
 
         SendGossipMenuFor(player, 68, creature);
@@ -188,12 +188,12 @@ public:
             {
                 if (sConfigMgr->GetOption<uint32>("Arena1v1.MinLevel", 80) <= player->getLevel())
                 {
-                    if (player->GetMoney() >= uint32(sConfigMgr->GetOption<uint32>("Arena1v1.Costs", 400000)) && CreateArenateam(player, creature))
-                        player->ModifyMoney(sConfigMgr->GetOption<uint32>("Arena1v1.Costs", 400000) * -1);
+                    if (player->GetMoney() >= uint32(sConfigMgr->GetOption<uint32>("Arena1v1.Costs", 10000)) && CreateArenateam(player, creature))
+                        player->ModifyMoney(sConfigMgr->GetOption<uint32>("Arena1v1.Costs", 10000) * -1);
                 }
                 else
                 {
-                    handler.PSendSysMessage("You have to be level %u + to create a 1v1 arena team.", sConfigMgr->GetOption<uint32>("Arena1v1.MinLevel", 70));
+                    handler.PSendSysMessage("你的等级至少要达到%u才能创建1V1竞技场战队", sConfigMgr->GetOption<uint32>("Arena1v1.MinLevel", 70));
                     return true;
                 }
                 CloseGossipMenuFor(player);
@@ -241,12 +241,12 @@ public:
                 if (at)
                 {
                     std::stringstream s;
-                    s << "\nRating: " << at->GetStats().Rating;
-                    s << "\nRank: " << at->GetStats().Rank;
-                    s << "\nSeason Games: " << at->GetStats().SeasonGames;
-                    s << "\nSeason Wins: " << at->GetStats().SeasonWins;
-                    s << "\nWeek Games: " << at->GetStats().WeekGames;
-                    s << "\nWeek Wins: " << at->GetStats().WeekWins;
+                    s << "\n评级: " << at->GetStats().Rating;
+                    s << "\n排名: " << at->GetStats().Rank;
+                    s << "\n赛季总场次: " << at->GetStats().SeasonGames;
+                    s << "\n赛季获胜场次: " << at->GetStats().SeasonWins;
+                    s << "\n周总场次: " << at->GetStats().WeekGames;
+                    s << "\n周获胜场次: " << at->GetStats().WeekWins;
 
                     ChatHandler(player->GetSession()).PSendSysMessage(SERVER_MSG_STRING, s.str().c_str());
                 }
@@ -259,7 +259,7 @@ public:
                 WorldPacket Data;
                 Data << playerArenaTeam(player);
                 player->GetSession()->HandleArenaTeamLeaveOpcode(Data);
-                handler.SendSysMessage("Arenateam deleted!");
+                handler.SendSysMessage("竞技场队伍已删除");
                 CloseGossipMenuFor(player);
                 return true;
             }
@@ -368,7 +368,7 @@ private:
         // Check if player is already in an arena team
         if (player->GetArenaTeamId(slot))
         {
-            player->GetSession()->SendArenaTeamCommandResult(ERR_ARENA_TEAM_CREATE_S, player->GetName(), "You are already in an arena team!", ERR_ALREADY_IN_ARENA_TEAM);
+            player->GetSession()->SendArenaTeamCommandResult(ERR_ARENA_TEAM_CREATE_S, player->GetName(), "你已经在一个竞技场战队中了！", ERR_ALREADY_IN_ARENA_TEAM);
             return false;
         }
 
@@ -387,7 +387,7 @@ private:
         // Register arena team
         sArenaTeamMgr->AddArenaTeam(arenaTeam);
 
-        ChatHandler(player->GetSession()).SendSysMessage("1v1 Arenateam successfully created!");
+        ChatHandler(player->GetSession()).SendSysMessage("1v1竞技场战队创建成功");
 
         // This disaster is the result of changing the MAX_ARENA_SLOT from 3 to 4.
         player->SetHonorPoints(playerHonorPoints);
